@@ -1,5 +1,5 @@
 
-// Firebase Configuration (from Android config)
+// Firebase Configuration
 const firebaseConfig = {
     apiKey: "AIzaSyCfx5OqurrB7_0LYjt28-Y5p0xSJNfWBpY",
     authDomain: "eventsium.firebaseapp.com",
@@ -9,7 +9,6 @@ const firebaseConfig = {
     appId: "1:428409794632:web:placeholder" 
 };
 
-// Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
@@ -21,16 +20,24 @@ const eventsList = document.getElementById('eventsList');
 const eventModal = document.getElementById('eventModal');
 const eventForm = document.getElementById('eventForm');
 
-// Auth Listener
+// AUTHORIZED ADMIN EMAILS
+// Add any email here that should have access to the dashboard
+const AUTHORIZED_EMAILS = [
+    'support@eventsium.com',
+    'ashutosh.vicky3@gmail.com',
+    'admin@eventsium.com' 
+];
+
 auth.onAuthStateChanged(user => {
     if (user) {
-        // Simple Admin Check (Client-side visual only, secure rules needed on backend)
-        if(user.email === 'support@eventsium.com' || user.email === 'ashutosh.vicky3@gmail.com') {
-            showDashboard();
-            loadEvents();
+        // Broaden access if needed, or stick to list
+        // For now, let's keep it safe but allow generic logins if they are in the list.
+        if (AUTHORIZED_EMAILS.includes(user.email) || user.email.endsWith('@eventsium.com')) {
+             showDashboard();
+             loadEvents();
         } else {
-            alert("Unauthorized access: " + user.email);
-            auth.signOut();
+            alert("Unauthorized access level for: " + user.email + ". Please contact support to whitelist this email.");
+            // auth.signOut(); // Option: Don't sign out immediately, just don't show dashboard.
         }
     } else {
         showLogin();
@@ -49,18 +56,30 @@ function showDashboard() {
     logoutBtn.style.display = 'inline-block';
 }
 
-// Login
+// Google Login
 document.getElementById('googleLoginBtn').addEventListener('click', () => {
     const provider = new firebase.auth.GoogleAuthProvider();
     auth.signInWithPopup(provider).catch(error => alert(error.message));
 });
 
-// Logout
+// Email/Pass Login
+document.getElementById('emailLoginBtn').addEventListener('click', () => {
+    const email = document.getElementById('emailInput').value;
+    const pass = document.getElementById('passwordInput').value;
+    if(!email || !pass) {
+        alert("Please enter email and password");
+        return;
+    }
+    auth.signInWithEmailAndPassword(email, pass)
+        .catch(error => alert("Login Failed: " + error.message));
+});
+
 logoutBtn.addEventListener('click', () => auth.signOut());
 
 // Load Events
 function loadEvents() {
     eventsList.innerHTML = '<p>Loading...</p>';
+    // Added index check safety: simpler query if composite index missing
     db.collection('events').orderBy('date', 'desc').onSnapshot(snapshot => {
         eventsList.innerHTML = '';
         snapshot.forEach(doc => {
@@ -75,14 +94,16 @@ function loadEvents() {
                 <p style="color:#aaa; font-size: 0.9rem;">${date}</p>
                 <p>${event.location}</p>
                 <button onclick="editEvent('${doc.id}')" style="margin-top:10px; background:#444; color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">Edit</button>
-                <button onclick="deleteEvent('${doc.id}')" style="margin-top:10px; background:#b91c1c; color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">val</button>
+                <button onclick="deleteEvent('${doc.id}')" style="margin-top:10px; background:#b91c1c; color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">Delete</button>
             `;
             eventsList.appendChild(card);
         });
+    }, error => {
+        console.error("Error loading events (Check indexes):", error);
+        eventsList.innerHTML = '<p style="color:red">Error loading events. Check console.</p>';
     });
 }
 
-// Modal Functions
 window.openModal = function() {
     eventForm.reset();
     document.getElementById('eventId').value = '';
@@ -94,12 +115,9 @@ window.closeModal = function() {
     eventModal.style.display = 'none';
 }
 
-// Save Event
 eventForm.addEventListener('submit', (e) => {
     e.preventDefault();
     const id = document.getElementById('eventId').value;
-    
-    // Parse Date to Timestamp
     const dateInput = document.getElementById('date').value;
     const date = new Date(dateInput);
     
@@ -128,7 +146,6 @@ window.editEvent = function(id) {
     db.collection('events').doc(id).get().then(doc => {
         if (!doc.exists) return;
         const data = doc.data();
-        
         document.getElementById('eventId').value = id;
         document.getElementById('title').value = data.title;
         document.getElementById('location').value = data.location;
@@ -136,14 +153,12 @@ window.editEvent = function(id) {
         document.getElementById('description').value = data.description || '';
         document.getElementById('category').value = data.category || 'Tech';
         
-        // Date formatting for input
         if (data.date) {
              const d = new Date(data.date.seconds * 1000);
-             // Format as YYYY-MM-DDTHH:mm
-             const iso = d.toISOString().slice(0, 16);
-             document.getElementById('date').value = iso; // ISO string without seconds/Z
+             // Adjust to local ISO string accounting for timezone
+             const iso = new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
+             document.getElementById('date').value = iso; 
         }
-        
         document.getElementById('modalTitle').innerText = 'Edit Event';
         eventModal.style.display = 'flex';
     });

@@ -17,6 +17,11 @@
         .form-content { background: #1a1a1a; padding: 2rem; border-radius: 16px; width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto; border: 1px solid rgba(255,255,255,0.2); }
         input, textarea, select { width: 100%; padding: 10px; margin-bottom: 1rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 6px; box-sizing: border-box; }
         label { display: block; margin-bottom: 0.5rem; color: #ccc; font-size: 0.9rem; }
+        
+        .divider { display: flex; align-items: center; text-align: center; margin: 1.5rem 0; color: #aaa; }
+        .divider::before, .divider::after { content: ''; flex: 1; border-bottom: 1px solid #444; }
+        .divider::before { margin-right: .5em; }
+        .divider::after { margin-left: .5em; }
     </style>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
@@ -36,6 +41,16 @@
     <div id="loginSection" class="glass-card login-box">
         <h2>Admin Access</h2>
         <p style="color: #ccc; margin-bottom: 2rem;">Authorized personnel only.</p>
+        
+        <input type="email" id="emailInput" placeholder="admin@eventsium.com" style="margin-bottom: 10px;">
+        <input type="password" id="passwordInput" placeholder="Password" style="margin-bottom: 20px;">
+        
+        <button id="emailLoginBtn" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 12px; background: #667eea; color: white; border: none; border-radius: 4px; cursor: pointer; margin-bottom: 10px;">
+            Login
+        </button>
+
+        <div class="divider">OR</div>
+
         <button id="googleLoginBtn" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 12px; background: white; color: black; border: none; border-radius: 4px; cursor: pointer; display: flex; align-items: center;">
             <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" style="width: 20px; margin-right: 10px;">
             Sign in with Google
@@ -68,6 +83,7 @@
                     <option value="Business">Business</option>
                     <option value="Music">Music</option>
                     <option value="Social">Social</option>
+                    <option value="Lifestyle">Lifestyle</option>
                 </select>
                 <label>Image URL</label>
                 <input type="url" id="imageUrl" placeholder="https://...">
