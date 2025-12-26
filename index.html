@@ -3,53 +3,79 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eventsium - Discover Tech Events</title>
+    <title>Eventsium - The Future of Event Discovery</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/onerfusion/eventsium/main/assets/images/icon_squared.png">
+    <link rel="icon" type="image/png" href="assets/images/icon_squared.png">
+    <!-- Inter Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
 
-    <div class="background-animate"></div>
+    <!-- Animated Background Glows -->
+    <div class="background-glow glow-1"></div>
+    <div class="background-glow glow-2"></div>
 
     <header>
-        <div class="logo">EVENTSIUM</div>
+        <a href="index.html" class="brand">
+            <img src="assets/images/transparent_e_logo.png" alt="Eventsium Logo" class="brand-logo">
+            <span class="brand-text">EVENTSIUM</span>
+        </a>
         <nav>
-            <a href="index.html">Home</a>
+            <a href="#features">Features</a>
             <a href="privacy.html">Privacy</a>
             <a href="mailto:support@eventsium.com">Support</a>
         </nav>
     </header>
 
-    <main class="hero">
-        <h1>Discover Tech Events<br>Like Never Before.</h1>
-        <p class="lead">Aggregating events from Google, Meetup, Splunk, and more into one seamless, AI-powered experience.</p>
-
-        <div class="cta-buttons">
-            <!-- Google Play Badge Placeholder -->
-            <a href="#" class="btn btn-primary">
-                Download for Android
-            </a>
-            <a href="#" class="btn btn-secondary">
-                Coming to iOS
-            </a>
-        </div>
-
-        <div class="screenshot-container">
-            <div class="glass-card">
-                <!-- Placeholder for App Screenshot -->
-                <div style="width: 300px; height: 600px; display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.2); border: 2px dashed rgba(255,255,255,0.1); border-radius: 16px;">
-                    App Preview
+    <main>
+        <section class="hero">
+            <div class="hero-content">
+                <span class="badge">🚀 v1.0 Now Available</span>
+                <h1>Discover Tech Events<br>Without Limits.</h1>
+                <p class="lead">Aggregating Google, Meetup, Splunk, and more into one AI-powered futuristic map.</p>
+                
+                <div class="cta-group">
+                    <a href="#" class="btn btn-primary">
+                        <img src="assets/images/icon_squared.png" width="20" style="border-radius: 4px;"> 
+                        Download App
+                    </a>
+                    <a href="#demo" class="btn btn-outline">Watch Demo</a>
                 </div>
             </div>
-        </div>
+
+            <div class="hero-visual">
+                <div class="glass-phone">
+                    <!-- Central Logo in Phone Display -->
+                    <img src="assets/images/transparent_e_logo.png" alt="App Preview" class="app-logo-large">
+                    <p style="margin-top: 20px; color: rgba(255,255,255,0.5); font-size: 0.9rem;">Interactive Map View</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="features" class="features">
+            <div class="feature-card">
+                <div class="feature-icon">🌍</div>
+                <h3>AI Map Discovery</h3>
+                <p>Explore tech events visually with our live city map interface.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">⚡</div>
+                <h3>Multi-Source</h3>
+                <p>One app for GDG, Meetup.com, Eventbrite, and Luma.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔒</div>
+                <h3>Privacy First</h3>
+                <p>Your data stays yours. No tracking without consent.</p>
+            </div>
+        </section>
     </main>
 
-    <footer class="footer">
-        <p>&copy; 2025 OnerFusion Inc. All rights reserved.</p>
-        <p>
-            <a href="privacy.html">Privacy Policy</a> | 
-            <a href="privacy.html">Terms of Service</a> |
-            <a href="mailto:support@eventsium.com">Delete Account</a>
+    <footer style="text-align: center; padding: 4rem; color: #64748b; border-top: 1px solid rgba(255,255,255,0.1);">
+        <p>&copy; 2025 OnerFusion Inc.</p>
+        <p style="font-size: 0.9rem; margin-top: 1rem;">
+            <a href="privacy.html" style="color: #64748b; text-decoration: none; margin: 0 10px;">Privacy Policy</a> • 
+            <a href="mailto:support@eventsium.com" style="color: #64748b; text-decoration: none; margin: 0 10px;">Contact</a>
         </p>
     </footer>
 
