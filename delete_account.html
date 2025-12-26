@@ -21,12 +21,12 @@
         </nav>
     </header>
 
-    <main style="max-width: 500px; margin: 4rem auto; padding: 2rem;">
+    <main style="max-width: 600px; margin: 4rem auto; padding: 2rem;">
         <div class="glass-card" style="padding: 2.5rem;">
             <h1 style="font-size: 1.8rem; margin-bottom: 0.5rem;">Delete Account</h1>
-            <p style="color: #64748b; margin-bottom: 2rem;">Please verify your email to continue.</p>
+            <p style="color: #64748b; margin-bottom: 2rem;">Please provide your details to verify account ownership.</p>
             
-            <div style="background: #fef2f2; border: 1px solid #fecaca; padding: 16px; border-radius: 8px; margin-bottom: 24px;">
+            <div style="background: #fef2f2; border: 1px solid #fecaca; padding: 16px; border-radius: 8px; margin-bottom: 24.px;">
                 <p style="color: #b91c1c; font-size: 0.9rem; margin: 0; font-weight: 500;">
                     ⚠️ Warning: This action is permanent.
                 </p>
@@ -41,9 +41,27 @@
                 <input type="hidden" name="_subject" value="URGENT: Account Deletion Request">
                 <input type="hidden" name="_captcha" value="false">
 
-                <div style="margin-bottom: 1.5rem;">
+                <!-- Name Fields -->
+                <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                    <div style="flex: 1;">
+                        <label style="font-weight: 500; font-size: 0.9rem; color: #334155;">First Name</label>
+                        <input type="text" name="first_name" placeholder="John" required>
+                    </div>
+                    <div style="flex: 1;">
+                        <label style="font-weight: 500; font-size: 0.9rem; color: #334155;">Last Name</label>
+                        <input type="text" name="last_name" placeholder="Doe" required>
+                    </div>
+                </div>
+
+                <!-- Phone Field -->
+                <div style="margin-bottom: 1rem;">
+                    <label style="font-weight: 500; font-size: 0.9rem; color: #334155;">Phone Number</label>
+                    <input type="tel" name="phone" placeholder="+1 (555) 000-0000" required>
+                </div>
+
+                <div style="margin-bottom: 1rem;">
                     <label style="font-weight: 500; font-size: 0.9rem; color: #334155;">Email Address</label>
-                    <input type="email" name="email" placeholder="name@example.com" required>
+                    <input type="email" name="email" placeholder="john.doe@example.com" required>
                 </div>
 
                 <div style="margin-bottom: 1.5rem;">
@@ -60,6 +78,11 @@
 
     <footer>
         <p>&copy; 2025 OnerFusion Inc.</p>
+        <p style="font-size: 0.9rem; margin-top: 1rem;">
+            <a href="privacy.html" style="color: #64748b; text-decoration: none; margin: 0 10px;">Privacy Policy</a> • 
+            <a href="delete_account.html" style="color: #ef4444; font-weight: 600; text-decoration: none; margin: 0 10px;">Delete Account</a> •
+            <a href="mailto:support@eventsium.com" style="color: #64748b; text-decoration: none; margin: 0 10px;">Contact</a>
+        </p>
     </footer>
 
 </body>
