@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eventsium Admin</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .admin-container { max-width: 1200px; margin: 100px auto; padding: 2rem; }
+        .login-box { max-width: 400px; margin: 150px auto; text-align: center; padding: 3rem; }
+        .dashboard { display: none; }
+        .event-list { margin-top: 2rem; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; }
+        .event-card { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 16px; padding: 1.5rem; position: relative; }
+        .event-card img { width: 100%; height: 150px; object-fit: cover; border-radius: 8px; margin-bottom: 1rem; }
+        .btn-add { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 12px 24px; border-radius: 8px; cursor: pointer; font-weight: 600; margin-bottom: 2rem; }
+        .form-modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center; }
+        .form-content { background: #1a1a1a; padding: 2rem; border-radius: 16px; width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto; border: 1px solid rgba(255,255,255,0.2); }
+        input, textarea, select { width: 100%; padding: 10px; margin-bottom: 1rem; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 6px; box-sizing: border-box; }
+        label { display: block; margin-bottom: 0.5rem; color: #ccc; font-size: 0.9rem; }
+    </style>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    <header>
+        <a href="index.html" class="brand">
+            <img src="assets/images/transparent_e_logo.png" alt="Eventsium Logo" class="brand-logo" style="height: 32px; width: auto; vertical-align: middle; margin-right: 8px;">
+            <span class="brand-text">ADMIN PORTAL</span>
+        </a>
+        <nav>
+            <a href="#" id="logoutBtn" style="display:none;">Logout</a>
+        </nav>
+    </header>
+
+    <div id="loginSection" class="glass-card login-box">
+        <h2>Admin Access</h2>
+        <p style="color: #ccc; margin-bottom: 2rem;">Authorized personnel only.</p>
+        <button id="googleLoginBtn" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 12px; background: white; color: black; border: none; border-radius: 4px; cursor: pointer; display: flex; align-items: center;">
+            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" style="width: 20px; margin-right: 10px;">
+            Sign in with Google
+        </button>
+    </div>
+
+    <div id="dashboardSection" class="dashboard admin-container">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h1>Manage Events</h1>
+            <button onclick="openModal()" class="btn-add">+ Add New Event</button>
+        </div>
+        <div id="eventsList" class="event-list">Loading events...</div>
+    </div>
+
+    <div id="eventModal" class="form-modal">
+        <div class="form-content">
+            <h2 id="modalTitle" style="margin-top:0;">Add Event</h2>
+            <form id="eventForm">
+                <input type="hidden" id="eventId">
+                <label>Event Title</label>
+                <input type="text" id="title" required placeholder="Event Name">
+                <label>Date & Time</label>
+                <input type="datetime-local" id="date" required>
+                <label>Location</label>
+                <input type="text" id="location" required placeholder="City/Venue">
+                <label>Category</label>
+                <select id="category">
+                    <option value="Tech">Tech</option>
+                    <option value="Design">Design</option>
+                    <option value="Business">Business</option>
+                    <option value="Music">Music</option>
+                    <option value="Social">Social</option>
+                </select>
+                <label>Image URL</label>
+                <input type="url" id="imageUrl" placeholder="https://...">
+                <label>Description</label>
+                <textarea id="description" rows="3"></textarea>
+                <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+                    <button type="button" onclick="closeModal()" style="flex: 1; padding: 10px; background: #444; color: white; border:none; border-radius: 4px; cursor:pointer;">Cancel</button>
+                    <button type="submit" style="flex: 1; padding: 10px; background: #667eea; color: white; border:none; border-radius: 4px; cursor:pointer;">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script src="admin_script.js"></script>
+</body>
+</html>
