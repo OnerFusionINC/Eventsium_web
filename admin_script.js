@@ -20,8 +20,6 @@ const eventsList = document.getElementById('eventsList');
 const eventModal = document.getElementById('eventModal');
 const eventForm = document.getElementById('eventForm');
 
-// AUTHORIZED ADMIN EMAILS
-// Add any email here that should have access to the dashboard
 const AUTHORIZED_EMAILS = [
     'support@eventsium.com',
     'ashutosh.vicky3@gmail.com',
@@ -30,14 +28,12 @@ const AUTHORIZED_EMAILS = [
 
 auth.onAuthStateChanged(user => {
     if (user) {
-        // Broaden access if needed, or stick to list
-        // For now, let's keep it safe but allow generic logins if they are in the list.
         if (AUTHORIZED_EMAILS.includes(user.email) || user.email.endsWith('@eventsium.com')) {
              showDashboard();
              loadEvents();
         } else {
-            alert("Unauthorized access level for: " + user.email + ". Please contact support to whitelist this email.");
-            // auth.signOut(); // Option: Don't sign out immediately, just don't show dashboard.
+            alert("Unauthorized access level for: " + user.email);
+            auth.signOut();
         }
     } else {
         showLogin();
@@ -56,30 +52,22 @@ function showDashboard() {
     logoutBtn.style.display = 'inline-block';
 }
 
-// Google Login
 document.getElementById('googleLoginBtn').addEventListener('click', () => {
     const provider = new firebase.auth.GoogleAuthProvider();
     auth.signInWithPopup(provider).catch(error => alert(error.message));
 });
 
-// Email/Pass Login
 document.getElementById('emailLoginBtn').addEventListener('click', () => {
     const email = document.getElementById('emailInput').value;
     const pass = document.getElementById('passwordInput').value;
-    if(!email || !pass) {
-        alert("Please enter email and password");
-        return;
-    }
-    auth.signInWithEmailAndPassword(email, pass)
-        .catch(error => alert("Login Failed: " + error.message));
+    if(!email || !pass) { alert("Please enter email and password"); return; }
+    auth.signInWithEmailAndPassword(email, pass).catch(error => alert(error.message));
 });
 
 logoutBtn.addEventListener('click', () => auth.signOut());
 
-// Load Events
 function loadEvents() {
     eventsList.innerHTML = '<p>Loading...</p>';
-    // Added index check safety: simpler query if composite index missing
     db.collection('events').orderBy('date', 'desc').onSnapshot(snapshot => {
         eventsList.innerHTML = '';
         snapshot.forEach(doc => {
@@ -90,17 +78,20 @@ function loadEvents() {
             card.className = 'event-card';
             card.innerHTML = `
                 <img src="${event.imageUrl || 'assets/images/placeholder.jpg'}" onerror="this.src='https://via.placeholder.com/300'">
-                <h3>${event.title}</h3>
-                <p style="color:#aaa; font-size: 0.9rem;">${date}</p>
-                <p>${event.location}</p>
-                <button onclick="editEvent('${doc.id}')" style="margin-top:10px; background:#444; color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">Edit</button>
-                <button onclick="deleteEvent('${doc.id}')" style="margin-top:10px; background:#b91c1c; color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">Delete</button>
+                <div class="card-content">
+                    <h3>${event.title}</h3>
+                    <p>${date}<br>${event.location}</p>
+                    <div style="display:flex; gap:10px;">
+                        <button onclick="editEvent('${doc.id}')" style="background:rgba(255,255,255,0.1); border:none; color:white; padding:6px 12px; border-radius:6px; cursor:pointer;">Edit</button>
+                        <button onclick="deleteEvent('${doc.id}')" style="background:rgba(220, 38, 38, 0.2); border:1px solid rgba(220, 38, 38, 0.5); color:#fca5a5; padding:6px 12px; border-radius:6px; cursor:pointer;">Delete</button>
+                    </div>
+                </div>
             `;
             eventsList.appendChild(card);
         });
     }, error => {
-        console.error("Error loading events (Check indexes):", error);
-        eventsList.innerHTML = '<p style="color:red">Error loading events. Check console.</p>';
+        console.error(error);
+        eventsList.innerHTML = '<p style="color:#f87171">Error loading events. Check console.</p>';
     });
 }
 
@@ -132,13 +123,9 @@ eventForm.addEventListener('submit', (e) => {
     };
 
     if (id) {
-        db.collection('events').doc(id).update(data)
-            .then(() => closeModal())
-            .catch(err => alert(err.message));
+        db.collection('events').doc(id).update(data).then(() => closeModal()).catch(err => alert(err.message));
     } else {
-        db.collection('events').add(data)
-            .then(() => closeModal())
-            .catch(err => alert(err.message));
+        db.collection('events').add(data).then(() => closeModal()).catch(err => alert(err.message));
     }
 });
 
@@ -152,10 +139,8 @@ window.editEvent = function(id) {
         document.getElementById('imageUrl').value = data.imageUrl || '';
         document.getElementById('description').value = data.description || '';
         document.getElementById('category').value = data.category || 'Tech';
-        
         if (data.date) {
              const d = new Date(data.date.seconds * 1000);
-             // Adjust to local ISO string accounting for timezone
              const iso = new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
              document.getElementById('date').value = iso; 
         }
