@@ -1,11 +1,11 @@
 :root {
-    --bg-color: #0d1117;
-    --text-color: #e6edf3;
-    --primary: #6C63FF;
-    --secondary: #00E5FF;
-    --glass-bg: rgba(22, 27, 34, 0.7);
-    --glass-border: rgba(240, 246, 252, 0.1);
-    --accent-gradient: linear-gradient(135deg, #6C63FF 0%, #00E5FF 100%);
+    --bg-color: #1e2532; /* Lighter Slate Blue (Was #0d1117 Black) */
+    --text-color: #f0f6fc;
+    --primary: #7F77FF; /* Brighter Purple */
+    --secondary: #21E6FF; /* Brighter Cyan */
+    --glass-bg: rgba(40, 48, 65, 0.6); /* Lighter Glass */
+    --glass-border: rgba(255, 255, 255, 0.15);
+    --accent-gradient: linear-gradient(135deg, #7F77FF 0%, #21E6FF 100%);
 }
 
 body {
@@ -17,7 +17,7 @@ body {
     overflow-x: hidden;
 }
 
-/* Background Mesh Gradient Animation */
+/* Brighter Mesh Gradient */
 .background-animate {
     position: fixed;
     top: 0;
@@ -25,9 +25,10 @@ body {
     width: 100vw;
     height: 100vh;
     z-index: -1;
-    background: radial-gradient(circle at 10% 20%, rgba(108, 99, 255, 0.15) 0%, transparent 40%),
-                radial-gradient(circle at 90% 80%, rgba(0, 229, 255, 0.15) 0%, transparent 40%);
-    filter: blur(60px);
+    background: 
+        radial-gradient(circle at 15% 25%, rgba(127, 119, 255, 0.35) 0%, transparent 45%),
+        radial-gradient(circle at 85% 75%, rgba(33, 230, 255, 0.35) 0%, transparent 45%);
+    filter: blur(80px);
 }
 
 header {
@@ -35,12 +36,12 @@ header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(16px);
     border-bottom: 1px solid var(--glass-border);
     position: sticky;
     top: 0;
     z-index: 100;
-    background: rgba(13, 17, 23, 0.8);
+    background: rgba(30, 37, 50, 0.85); /* Matches new bg */
 }
 
 .logo {
@@ -50,59 +51,62 @@ header {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     letter-spacing: -1px;
+    filter: drop-shadow(0 0 10px rgba(127, 119, 255, 0.3)); /* Glow */
 }
 
 nav a {
     color: var(--text-color);
     text-decoration: none;
     margin-left: 2rem;
-    opacity: 0.8;
-    transition: opacity 0.2s;
+    opacity: 0.9; /* More visible */
+    transition: all 0.2s;
     font-weight: 500;
 }
 
 nav a:hover {
     opacity: 1;
     color: var(--secondary);
+    text-shadow: 0 0 8px rgba(33, 230, 255, 0.4);
 }
 
 .hero {
     text-align: center;
-    padding: 6rem 2rem;
-    max-width: 800px;
+    padding: 8rem 2rem; /* More spacing */
+    max-width: 900px;
     margin: 0 auto;
 }
 
 h1 {
-    font-size: 3.5rem;
+    font-size: 4rem;
     line-height: 1.1;
     margin-bottom: 1.5rem;
-    background: linear-gradient(180deg, #fff 0%, #a2a9b1 100%);
+    background: linear-gradient(180deg, #fff 0%, #e2e8f0 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 20px rgba(127, 119, 255, 0.2));
 }
 
 p.lead {
-    font-size: 1.25rem;
-    color: #8b949e;
-    margin-bottom: 3rem;
-    max-width: 600px;
+    font-size: 1.35rem;
+    color: #cbd5e1; /* Lighter gray */
+    margin-bottom: 3.5rem;
+    max-width: 650px;
     margin-left: auto;
     margin-right: auto;
 }
 
 .screenshot-container {
     perspective: 1000px;
-    margin: 4rem 0;
+    margin: 5rem 0;
 }
 
 .glass-card {
-    background: var(--glass-bg);
-    border: 1px solid var(--glass-border);
-    border-radius: 24px;
-    padding: 2rem;
-    backdrop-filter: blur(20px);
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 30px;
+    padding: 2.5rem;
+    backdrop-filter: blur(25px);
+    box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.4);
     display: inline-block;
     transform: rotateX(5deg);
     transition: transform 0.5s ease;
@@ -110,69 +114,85 @@ p.lead {
 
 .glass-card:hover {
     transform: rotateX(0deg) scale(1.02);
+    border-color: rgba(255, 255, 255, 0.4);
 }
 
 .cta-buttons {
     display: flex;
-    gap: 1rem;
+    gap: 1.5rem;
     justify-content: center;
     flex-wrap: wrap;
 }
 
 .btn {
-    padding: 0.8rem 2rem;
-    border-radius: 12px;
-    font-weight: 600;
+    padding: 1rem 2.5rem;
+    border-radius: 16px;
+    font-weight: 700;
     text-decoration: none;
-    transition: transform 0.2s;
+    transition: all 0.2s;
+    font-size: 1.1rem;
 }
 
 .btn-primary {
     background: var(--primary);
-    color: white;
-    box-shadow: 0 0 20px rgba(108, 99, 255, 0.4);
+    background: var(--accent-gradient);
+    color: #0d1117; /* Dark text on bright button for contrast */
+    box-shadow: 0 0 25px rgba(127, 119, 255, 0.5);
 }
 
 .btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 0 30px rgba(108, 99, 255, 0.6);
+    transform: translateY(-3px);
+    box-shadow: 0 0 40px rgba(127, 119, 255, 0.7);
 }
 
 .btn-secondary {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.15);
     color: white;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 .btn-secondary:hover {
-    background: rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.25);
+    border-color: white;
 }
 
 /* Privacy Policy Specifics */
 .legal-content {
     max-width: 800px;
-    margin: 4rem auto;
-    padding: 2rem;
-    background: rgba(22, 27, 34, 0.5);
-    border-radius: 16px;
+    margin: 6rem auto;
+    padding: 2.5rem;
+    background: rgba(30, 37, 50, 0.6);
+    border-radius: 20px;
     border: 1px solid var(--glass-border);
+    backdrop-filter: blur(20px);
 }
 
 .legal-content h2 {
-    color: var(--primary);
-    margin-top: 2rem;
+    color: var(--secondary); /* Cyan headers */
+    margin-top: 2.5rem;
+    font-size: 1.8rem;
+}
+
+.legal-content p, .legal-content ul {
+    color: #e2e8f0;
 }
 
 .footer {
     text-align: center;
     padding: 4rem 2rem;
-    color: #8b949e;
+    color: #94a3b8;
     font-size: 0.9rem;
     border-top: 1px solid var(--glass-border);
-    margin-top: 4rem;
+    margin-top: 6rem;
+    background: rgba(30, 37, 50, 0.4);
 }
 
 .footer a {
-    color: #8b949e;
-    margin: 0 0.5rem;
+    color: #94a3b8;
+    margin: 0 0.8rem;
+    text-decoration: none;
+}
+
+.footer a:hover {
+    color: var(--secondary);
 }
