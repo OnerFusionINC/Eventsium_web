@@ -23,12 +23,13 @@ const eventForm = document.getElementById('eventForm');
 const AUTHORIZED_EMAILS = [
     'support@eventsium.com',
     'ashutosh.vicky3@gmail.com',
-    'admin@eventsium.com' 
+    'admin@eventsium.com',
+    'ashutosh@onerfusion.com'
 ];
 
 auth.onAuthStateChanged(user => {
     if (user) {
-        if (AUTHORIZED_EMAILS.includes(user.email) || user.email.endsWith('@eventsium.com')) {
+        if (AUTHORIZED_EMAILS.includes(user.email) || user.email.endsWith('@eventsium.com') || user.email.endsWith('@onerfusion.com')) {
              showDashboard();
              loadEvents();
         } else {
