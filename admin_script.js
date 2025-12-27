@@ -207,7 +207,7 @@ const eventModal = document.getElementById('eventModal');
 window.openModal = function() {
     document.getElementById('eventForm').reset();
     document.getElementById('eventId').value = '';
-    document.getElementById('modalTitle').innerText = 'Add New Event (V2.2)';
+    document.getElementById('modalTitle').innerText = 'Add New Event (V2.3)';
     eventModal.style.display = 'flex';
 }
 
@@ -250,11 +250,13 @@ window.saveEvent = function(e) {
     e.preventDefault();
     const id = document.getElementById('eventId').value;
     
-    // Collecting Data V2.0
+    // Collecting Data V2.3
     const title = document.getElementById('title').value;
     const startStr = document.getElementById('startTime').value;
     const endStr = document.getElementById('endTime').value;
-    const category = document.getElementById('category').value;
+    
+    // Default hidden values
+    const category = 'Tech'; 
     const city = document.getElementById('city').value;
     const country = document.getElementById('country').value;
     const imageUrl = document.getElementById('imageUrl').value;
@@ -309,7 +311,6 @@ window.editEvent = function(id) {
         document.getElementById('title').value = data.title || '';
         document.getElementById('startTime').value = toDateTimeLocal(data.startTime || data.date);
         document.getElementById('endTime').value = toDateTimeLocal(data.endTime);
-        document.getElementById('category').value = data.category || 'Tech';
         
         document.getElementById('city').value = data.city || '';
         document.getElementById('country').value = data.country || '';
@@ -326,7 +327,7 @@ window.editEvent = function(id) {
 }
 
 window.deleteEvent = function(id) {
-    if(confirm('Dynamic Delete: This will permanently remove the event from the database and all devices. Confirm?')) {
+    if(confirm('Dynamic Delete: This will permanently remove the event from the database. Confirm?')) {
         db.collection('events').doc(id).delete().then(() => loadEvents());
     }
 }

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eventsium Admin v2.2</title>
+    <title>Eventsium Admin v2.3</title>
     <!-- Inter Font -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
@@ -340,8 +340,8 @@
     <!-- LOGIN SCREEN -->
     <div id="loginSection" class="glass-panel">
         <div>
-            <h1>Admin Access v2.2</h1>
-            <p style="opacity: 0.7;">Dynamic Event Management</p>
+            <h1>Admin Access v2.3</h1>
+            <p style="opacity: 0.7;">Seamless Event Management</p>
         </div>
 
         <div style="text-align: left; display: flex; flex-direction: column; gap: 12px;">
@@ -414,7 +414,7 @@
         </main>
     </div>
 
-    <!-- ADD/EDIT MODAL (V2.2 No Hide) -->
+    <!-- ADD/EDIT MODAL (V2.3 No Extras, Reordered) -->
     <div id="eventModal" class="modal">
         <div class="modal-content glass-panel">
             <h2 id="modalTitle" style="margin-top: 0; margin-bottom: 1.5rem;">Add Event</h2>
@@ -422,8 +422,8 @@
                 <input type="hidden" id="eventId">
                 
                 <div class="form-grid">
-                    <!-- Section 1: Basic Info -->
-                    <h3 class="section-title">Basic Information</h3>
+                    <!-- 1. WHAT & WHEN -->
+                    <h3 class="section-title">What & When</h3>
                     
                     <div class="form-group form-full">
                         <label>Event Name *</label>
@@ -440,25 +440,16 @@
                         <input type="datetime-local" id="endTime" required>
                     </div>
                     
-                    <div class="form-group">
-                        <label>Category</label>
-                        <select id="category">
-                            <option value="Tech">Tech</option>
-                            <option value="Design">Design</option>
-                            <option value="Business">Business</option>
-                            <option value="Marketing">Marketing</option>
-                        </select>
-                    </div>
+                    <!-- 2. DETAILS (Moved up) -->
+                    <h3 class="section-title">Details</h3>
 
-                    <div class="form-group">
-                        <label>Event Source</label>
-                        <select id="source" disabled style="opacity: 0.7;">
-                            <option value="manual">Manual Entry</option>
-                        </select>
+                    <div class="form-group form-full">
+                        <label>Agenda / Description</label>
+                        <textarea id="agenda" rows="5" placeholder="Enter event details, agenda, or notes..."></textarea>
                     </div>
-
-                    <!-- Section 2: Location -->
-                    <h3 class="section-title">Location</h3>
+                
+                    <!-- 3. WHERE -->
+                    <h3 class="section-title">Where</h3>
 
                     <div class="form-group">
                         <label>City</label>
@@ -475,9 +466,14 @@
                         <label for="isOnlineOverride">Make this a <b>Virtual/Online</b> Event</label>
                     </div>
 
-                    <!-- Section 3: Visuals & Links -->
-                    <h3 class="section-title">Visuals & Links</h3>
+                    <!-- 4. LINKS & VISUALS -->
+                    <h3 class="section-title">Links & Visuals</h3>
 
+                    <div class="form-group form-full">
+                        <label>Ticket / Event Website URL</label>
+                        <input type="url" id="hostWebsite" placeholder="https://..." required>
+                    </div>
+                    
                     <div class="form-group form-full">
                         <label>Banner Image (URL or Upload)</label>
                         <div class="upload-wrapper">
@@ -496,19 +492,6 @@
                                 📁 Upload <input type="file" id="logoFile" accept="image/*" onchange="uploadImage(this, 'hostLogoUrl')">
                             </label>
                         </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Ticket / Event Website URL</label>
-                        <input type="url" id="hostWebsite" placeholder="https://..." required>
-                    </div>
-
-                    <!-- Section 4: Details & Settings -->
-                    <h3 class="section-title">Details</h3>
-
-                    <div class="form-group form-full">
-                        <label>Agenda / Description</label>
-                        <textarea id="agenda" rows="5" placeholder="Enter event details, agenda, or notes..."></textarea>
                     </div>
 
                     <div class="form-group checkbox-group">
