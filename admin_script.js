@@ -170,12 +170,13 @@ function loadEvents() {
             const isHidden = data.isHidden ? '<span style="color:#ef4444; font-size: 0.8em; border:1px solid #ef4444; padding:2px 6px; border-radius:4px; margin-left:8px;">HIDDEN</span>' : '';
             const isPaid = data.isPaid ? '💰' : '';
             const isVirtual = data.isOnlineOverride ? '💻' : '';
+            const brand = data.source && data.source !== 'manual' ? `<span style="border:1px solid #6366f1; color:#818cf8; padding:2px 6px; border-radius:4px; margin-left:8px; font-size:0.8em;">${data.source}</span>` : '';
 
             const item = document.createElement('div');
             item.className = 'event-item';
             item.innerHTML = `
                 <div class="event-info">
-                    <h4>${data.title} ${isHidden}</h4>
+                    <h4>${data.title} ${isHidden} ${brand}</h4>
                     <div class="event-meta">
                         <span>📅 ${dateStr}</span>
                         <span>📍 ${data.city || 'Unknown City'}, ${data.country || ''} ${isVirtual}</span>
@@ -207,7 +208,7 @@ const eventModal = document.getElementById('eventModal');
 window.openModal = function() {
     document.getElementById('eventForm').reset();
     document.getElementById('eventId').value = '';
-    document.getElementById('modalTitle').innerText = 'Add New Event (V2.3)';
+    document.getElementById('modalTitle').innerText = 'Add New Event (V2.4)';
     eventModal.style.display = 'flex';
 }
 
@@ -250,12 +251,15 @@ window.saveEvent = function(e) {
     e.preventDefault();
     const id = document.getElementById('eventId').value;
     
-    // Collecting Data V2.3
+    // Collecting Data V2.4
     const title = document.getElementById('title').value;
     const startStr = document.getElementById('startTime').value;
     const endStr = document.getElementById('endTime').value;
     
-    // Default hidden values
+    // Brand Name Update
+    const sourceRaw = document.getElementById('source').value;
+    const source = sourceRaw ? sourceRaw.trim() : 'manual';
+
     const category = 'Tech'; 
     const city = document.getElementById('city').value;
     const country = document.getElementById('country').value;
@@ -291,7 +295,7 @@ window.saveEvent = function(e) {
         isOnlineOverride: isOnlineOverride,
         isPaid: isPaid,
         
-        source: 'manual'
+        source: source // Saved as Brand Name
     };
     
     if (id) {
@@ -309,6 +313,7 @@ window.editEvent = function(id) {
         
         // Fill Fields
         document.getElementById('title').value = data.title || '';
+        document.getElementById('source').value = (data.source && data.source !== 'manual') ? data.source : ''; // Brand
         document.getElementById('startTime').value = toDateTimeLocal(data.startTime || data.date);
         document.getElementById('endTime').value = toDateTimeLocal(data.endTime);
         

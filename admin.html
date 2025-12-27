@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Eventsium Admin v2.3</title>
+    <title>Eventsium Admin v2.4</title>
     <!-- Inter Font -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
@@ -340,7 +340,7 @@
     <!-- LOGIN SCREEN -->
     <div id="loginSection" class="glass-panel">
         <div>
-            <h1>Admin Access v2.3</h1>
+            <h1>Admin Access v2.4</h1>
             <p style="opacity: 0.7;">Seamless Event Management</p>
         </div>
 
@@ -414,7 +414,7 @@
         </main>
     </div>
 
-    <!-- ADD/EDIT MODAL (V2.3 No Extras, Reordered) -->
+    <!-- ADD/EDIT MODAL (V2.4 Brand Name) -->
     <div id="eventModal" class="modal">
         <div class="modal-content glass-panel">
             <h2 id="modalTitle" style="margin-top: 0; margin-bottom: 1.5rem;">Add Event</h2>
@@ -428,6 +428,12 @@
                     <div class="form-group form-full">
                         <label>Event Name *</label>
                         <input type="text" id="title" required placeholder="e.g. Google I/O 2025">
+                    </div>
+                    
+                    <div class="form-group form-full">
+                        <label>Organizer / Brand Name</label>
+                        <input type="text" id="source" placeholder="e.g. OpenAI, React London">
+                        <small style="color: #9ca3af;">Appears as the badge (e.g. 'Google', 'TEDx')</small>
                     </div>
 
                     <div class="form-group">
