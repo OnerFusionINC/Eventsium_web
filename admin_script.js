@@ -55,15 +55,46 @@ function showDashboard() {
 
 document.getElementById('googleLoginBtn').addEventListener('click', () => {
     const provider = new firebase.auth.GoogleAuthProvider();
-    auth.signInWithPopup(provider).catch(error => alert(error.message));
+    auth.signInWithPopup(provider).catch(error => {
+        console.error(error);
+        alert(error.message);
+    });
 });
 
 document.getElementById('emailLoginBtn').addEventListener('click', () => {
     const email = document.getElementById('emailInput').value;
-    const pass = document.getElementById('passwordInput').value;
-    if(!email || !pass) { alert("Please enter email and password"); return; }
-    auth.signInWithEmailAndPassword(email, pass).catch(error => alert(error.message));
+    const password = document.getElementById('passwordInput').value;
+    
+    if (!email || !password) {
+        alert('Please enter email and password');
+        return;
+    }
+
+    auth.signInWithEmailAndPassword(email, password)
+        .catch(error => {
+            console.error(error);
+            if (error.code === 'auth/invalid-login-credentials' || error.code === 'auth/wrong-password') {
+                 alert('Login Failed: Incorrect password.\n\nNote: If you signed up with Google, you might not have a password set yet. Use the Google button or click "Forgot/Set Password" to create one.');
+            } else {
+                 alert(error.message);
+            }
+        });
 });
+
+window.resetPassword = function() {
+    const email = document.getElementById('emailInput').value;
+    if (!email) {
+        alert('Please enter your email address in the box first.');
+        return;
+    }
+    
+    auth.sendPasswordResetEmail(email)
+        .then(() => {
+            alert('Password reset email sent to ' + email + '. Check your inbox to set a new password.');
+        })
+        .catch(error => alert(error.message));
+}
+// REMOVED EMAIL LOGIN LISTENER
 
 logoutBtn.addEventListener('click', () => auth.signOut());
 
