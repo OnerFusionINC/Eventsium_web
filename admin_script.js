@@ -63,7 +63,7 @@ document.getElementById('googleLoginBtn').addEventListener('click', () => {
 
 document.getElementById('emailLoginBtn').addEventListener('click', () => {
     const emailRaw = document.getElementById('emailInput').value;
-    const email = emailRaw ? emailRaw.trim().toLowerCase() : '';
+    const email = emailRaw ? emailRaw.trim() : '';
     const password = document.getElementById('passwordInput').value;
     
     if (!email || !password) {
