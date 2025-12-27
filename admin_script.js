@@ -6,64 +6,42 @@ const firebaseConfig = {
     projectId: "eventsium",
     storageBucket: "eventsium.firebasestorage.app",
     messagingSenderId: "428409794632",
-    appId: "1:428409794632:web:placeholder" 
+    appId: "1:428409794632:web:placeholder"
 };
 
-firebase.initializeApp(firebaseConfig);
+// Initialize Firebase
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
+
 const auth = firebase.auth();
 const db = firebase.firestore();
+const functions = firebase.functions(); // Initialize Functions
 
-const loginSection = document.getElementById('loginSection');
-const dashboardSection = document.getElementById('dashboardSection');
-const logoutBtn = document.getElementById('logoutBtn');
-const eventsList = document.getElementById('eventsList');
-const eventModal = document.getElementById('eventModal');
-const eventForm = document.getElementById('eventForm');
-
-const AUTHORIZED_EMAILS = [
-    'support@eventsium.com',
-    'ashutosh.vicky3@gmail.com',
-    'admin@eventsium.com',
-    'ashutosh@onerfusion.com'
-];
-
+// Auth State Listener
 auth.onAuthStateChanged(user => {
     if (user) {
-        if (AUTHORIZED_EMAILS.includes(user.email) || user.email.endsWith('@eventsium.com') || user.email.endsWith('@onerfusion.com')) {
-             showDashboard();
-             loadEvents();
-        } else {
-            alert("Unauthorized access level for: " + user.email);
-            auth.signOut();
-        }
+        showDashboard();
+        loadStats();
+        loadEvents();
     } else {
         showLogin();
     }
 });
 
 function showLogin() {
-    loginSection.style.display = 'block';
-    dashboardSection.style.display = 'none';
-    logoutBtn.style.display = 'none';
+    document.getElementById('loginSection').style.display = 'flex';
+    document.getElementById('dashboard').style.display = 'none';
 }
 
 function showDashboard() {
-    loginSection.style.display = 'none';
-    dashboardSection.style.display = 'block';
-    logoutBtn.style.display = 'inline-block';
+    document.getElementById('loginSection').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'flex';
 }
-
-document.getElementById('googleLoginBtn').addEventListener('click', () => {
-    const provider = new firebase.auth.GoogleAuthProvider();
-    auth.signInWithPopup(provider).catch(error => {
-        console.error(error);
-        alert(error.message);
-    });
-});
 
 document.getElementById('emailLoginBtn').addEventListener('click', () => {
     const emailRaw = document.getElementById('emailInput').value;
-    const email = emailRaw ? emailRaw.trim() : '';
+    const email = emailRaw ? emailRaw.trim() : ''; 
     const password = document.getElementById('passwordInput').value;
     
     if (!email || !password) {
@@ -74,64 +52,159 @@ document.getElementById('emailLoginBtn').addEventListener('click', () => {
     auth.signInWithEmailAndPassword(email, password)
         .catch(error => {
             console.error(error);
-            if (error.code === 'auth/invalid-login-credentials' || error.code === 'auth/wrong-password') {
-                 alert('Login Failed: Incorrect password.\n\nNote: If you signed up with Google, you might not have a password set yet. Use the Google button or click "Forgot/Set Password" to create one.');
-            } else {
-                 alert(error.message);
-            }
+            alert('Login Failed: ' + error.message);
         });
 });
 
-window.resetPassword = function() {
-    const email = document.getElementById('emailInput').value;
+window.logout = function() {
+    auth.signOut();
+}
+
+// --- OTP PASSWORD RESET LOGIC ---
+
+window.showOtpModal = function() {
+    document.getElementById('otpModal').style.display = 'flex';
+    // Pre-fill email if they typed it in main login
+    const mainEmail = document.getElementById('emailInput').value;
+    if (mainEmail) {
+        document.getElementById('resetEmailInput').value = mainEmail;
+    }
+}
+
+window.closeOtpModal = function() {
+    document.getElementById('otpModal').style.display = 'none';
+    document.getElementById('otpStep1').style.display = 'block';
+    document.getElementById('otpStep2').style.display = 'none';
+    // Reset inputs
+    document.getElementById('otpInput').value = '';
+    document.getElementById('newPasswordInput').value = '';
+}
+
+window.sendOtp = function() {
+    const email = document.getElementById('resetEmailInput').value;
     if (!email) {
-        alert('Please enter your email address in the box first.');
+        alert("Please enter your email");
         return;
     }
+
+    // Call Cloud Function
+    const sendOtpFn = functions.httpsCallable('sendForgotPasswordOtp');
     
-    auth.sendPasswordResetEmail(email)
-        .then(() => {
-            alert('Password reset email sent to ' + email + '. Check your inbox to set a new password.');
+    // Show loading state
+    const btn = event.target;
+    const originalText = btn.innerText;
+    btn.innerText = "Sending...";
+    btn.disabled = true;
+
+    console.log("Calling sendForgotPasswordOtp for " + email);
+    
+    sendOtpFn({ email: email })
+        .then(result => {
+             console.log("OTP Sent Result:", result);
+             alert('OTP sent to ' + email + '. Check your inbox (and SPAM folder).');
+             document.getElementById('otpStep1').style.display = 'none';
+             document.getElementById('otpStep2').style.display = 'block';
+             btn.innerText = originalText;
+             btn.disabled = false;
         })
-        .catch(error => alert(error.message));
-}
-// REMOVED EMAIL LOGIN LISTENER
-
-logoutBtn.addEventListener('click', () => auth.signOut());
-
-function loadEvents() {
-    eventsList.innerHTML = '<p>Loading...</p>';
-    db.collection('events').orderBy('date', 'desc').onSnapshot(snapshot => {
-        eventsList.innerHTML = '';
-        snapshot.forEach(doc => {
-            const event = doc.data();
-            const date = event.date ? new Date(event.date.seconds * 1000).toLocaleString() : 'No date';
-            
-            const card = document.createElement('div');
-            card.className = 'event-card';
-            card.innerHTML = `
-                <img src="${event.imageUrl || 'assets/images/placeholder.jpg'}" onerror="this.src='https://via.placeholder.com/300'">
-                <div class="card-content">
-                    <h3>${event.title}</h3>
-                    <p>${date}<br>${event.location}</p>
-                    <div style="display:flex; gap:10px;">
-                        <button onclick="editEvent('${doc.id}')" style="background:rgba(255,255,255,0.1); border:none; color:white; padding:6px 12px; border-radius:6px; cursor:pointer;">Edit</button>
-                        <button onclick="deleteEvent('${doc.id}')" style="background:rgba(220, 38, 38, 0.2); border:1px solid rgba(220, 38, 38, 0.5); color:#fca5a5; padding:6px 12px; border-radius:6px; cursor:pointer;">Delete</button>
-                    </div>
-                </div>
-            `;
-            eventsList.appendChild(card);
+        .catch(error => {
+             console.error("OTP Error:", error);
+             alert('Failed to send OTP: ' + error.message);
+             btn.innerText = originalText;
+             btn.disabled = false;
         });
-    }, error => {
-        console.error(error);
-        eventsList.innerHTML = '<p style="color:#f87171">Error loading events. Check console.</p>';
+}
+
+window.submitOtpReset = function() {
+    const email = document.getElementById('resetEmailInput').value;
+    const otp = document.getElementById('otpInput').value;
+    const newPassword = document.getElementById('newPasswordInput').value;
+
+    if (!otp || !newPassword) {
+        alert("Please enter valid OTP and New Password");
+        return;
+    }
+
+    const resetFn = functions.httpsCallable('resetPasswordWithOtp');
+    
+    const btn = event.target;
+    const originalText = btn.innerText;
+    btn.innerText = "Resetting...";
+    btn.disabled = true;
+
+    console.log("Calling resetPasswordWithOtp...");
+
+    // Cloud Function expects: { email, otp, newPassword }
+    resetFn({ email: email, otp: otp, newPassword: newPassword })
+        .then(result => {
+            console.log("Reset Result:", result);
+            alert('Password Reset Successful! You can now login.');
+            closeOtpModal();
+            // Auto fill password field for convenience
+            document.getElementById('emailInput').value = email;
+            document.getElementById('passwordInput').value = newPassword;
+            btn.innerText = originalText;
+            btn.disabled = false;
+            
+            // Auto login?
+            auth.signInWithEmailAndPassword(email, newPassword);
+        })
+        .catch(error => {
+            console.error("Reset Error:", error);
+            alert('Reset Failed: ' + error.message);
+            btn.innerText = originalText;
+            btn.disabled = false;
+        });
+}
+
+
+// --- DASHBOARD LOGIC ---
+
+function loadStats() {
+    document.getElementById('userCount').innerText = '12'; // Mock
+    
+    db.collection('events').get().then(snap => {
+        document.getElementById('eventCount').innerText = snap.size;
     });
 }
 
+function loadEvents() {
+    db.collection('events').orderBy('date', 'desc').get().then(querySnapshot => {
+        const listDiv = document.getElementById('eventsList');
+        listDiv.innerHTML = '';
+        
+        querySnapshot.forEach(doc => {
+            const data = doc.data();
+            const date = data.date ? new Date(data.date.seconds * 1000).toLocaleDateString() : 'TBA';
+            
+            const item = document.createElement('div');
+            item.className = 'event-item';
+            item.innerHTML = `
+                <div class="event-info">
+                    <h4>${data.title}</h4>
+                    <div class="event-meta">
+                        <span>📅 ${date}</span>
+                        <span>📍 ${data.location || 'Online'}</span>
+                        <span>🏷️ ${data.category || 'General'}</span>
+                    </div>
+                </div>
+                <div class="event-actions">
+                    <button class="btn-sm" onclick="editEvent('${doc.id}')">Edit</button>
+                    <button class="btn-sm btn-danger" onclick="deleteEvent('${doc.id}')">Delete</button>
+                </div>
+            `;
+            listDiv.appendChild(item);
+        });
+    });
+}
+
+// Modal Logic
+const eventModal = document.getElementById('eventModal');
+
 window.openModal = function() {
-    eventForm.reset();
+    document.getElementById('eventForm').reset();
     document.getElementById('eventId').value = '';
-    document.getElementById('modalTitle').innerText = 'Add New Event';
+    document.getElementById('modalTitle').innerText = 'Add Event';
     eventModal.style.display = 'flex';
 }
 
@@ -139,36 +212,39 @@ window.closeModal = function() {
     eventModal.style.display = 'none';
 }
 
-eventForm.addEventListener('submit', (e) => {
+window.saveEvent = function(e) {
     e.preventDefault();
     const id = document.getElementById('eventId').value;
-    const dateInput = document.getElementById('date').value;
-    const date = new Date(dateInput);
+    const title = document.getElementById('title').value;
+    const description = document.getElementById('description').value;
+    const imageUrl = document.getElementById('imageUrl').value;
+    const dateVal = document.getElementById('date').value;
+    const category = document.getElementById('category').value;
     
     const data = {
-        title: document.getElementById('title').value,
-        date: firebase.firestore.Timestamp.fromDate(date),
-        location: document.getElementById('location').value,
-        category: document.getElementById('category').value,
-        description: document.getElementById('description').value,
-        imageUrl: document.getElementById('imageUrl').value,
-        source: 'admin_portal'
+        title, description, imageUrl, category,
+        date: firebase.firestore.Timestamp.fromDate(new Date(dateVal)),
+        location: 'TBD' // Default
     };
-
+    
     if (id) {
-        db.collection('events').doc(id).update(data).then(() => closeModal()).catch(err => alert(err.message));
+        db.collection('events').doc(id).update(data).then(() => {
+            closeModal();
+            loadEvents();
+        });
     } else {
-        db.collection('events').add(data).then(() => closeModal()).catch(err => alert(err.message));
+        db.collection('events').add(data).then(() => {
+            closeModal();
+            loadEvents();
+        });
     }
-});
+}
 
 window.editEvent = function(id) {
     db.collection('events').doc(id).get().then(doc => {
-        if (!doc.exists) return;
         const data = doc.data();
         document.getElementById('eventId').value = id;
         document.getElementById('title').value = data.title;
-        document.getElementById('location').value = data.location;
         document.getElementById('imageUrl').value = data.imageUrl || '';
         document.getElementById('description').value = data.description || '';
         document.getElementById('category').value = data.category || 'Tech';
