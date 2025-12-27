@@ -161,14 +161,22 @@
         <p style="color: #64748b; margin-bottom: 2rem;">Authorized personnel only.</p>
         
         <input type="email" id="emailInput" placeholder="admin@eventsium.com">
-        <input type="password" id="passwordInput" placeholder="Password">
-        
-        <button id="emailLoginBtn" class="btn-primary" style="background: #4f46e5; color: white; border: none; margin-top: 0.5rem;">
-            Login
-        </button>
-        
-        <div style="margin-top: 10px;">
-            <a href="#" onclick="resetPassword()" style="color: #64748b; font-size: 0.8rem;">Forgot/Set Password?</a>
+        <input type="password" id="passwordInput" placeholder="Password (only if set)">
+            
+            <div style="text-align: left; margin: 8px 0 24px 0; color: #9ca3af; font-size: 0.9rem;">
+                <input type="checkbox" id="showPass" onclick="togglePasswordVisibility()">
+                <label for="showPass">Show Password</label>
+            </div>
+
+            <button id="emailLoginBtn" class="btn-primary" style="background: #4f46e5; color: white; border: none; margin-top: 0.5rem;">Login</button>
+            
+            <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.1);">
+                <p style="color: #9ca3af; font-size: 0.9rem; margin-bottom: 12px;">Forgot your password? Or need to set one?</p>
+                <div style="display: flex; gap: 8px;">
+                     <button onclick="resetPassword()" style="background: transparent; border: 1px solid rgba(255,255,255,0.2); color: #9ca3af; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 0.9rem; width: 100%;">Forgot/Set Password?</button>
+                </div>
+            </div>
+            <p style="margin-top:20px; font-size:0.8rem; color:#6b7280;">Only authorized admins can access dashboard.</p>
         </div>
 
         <div class="divider">OR</div>
@@ -222,5 +230,15 @@
         </div>
     </div>
     <script src="admin_script.js"></script>
+    <script>
+        function togglePasswordVisibility() {
+            var x = document.getElementById("passwordInput");
+            if (x.type === "password") {
+                x.type = "text";
+            } else {
+                x.type = "password";
+            }
+        }
+    </script>
 </body>
 </html>
