@@ -207,7 +207,7 @@ const eventModal = document.getElementById('eventModal');
 window.openModal = function() {
     document.getElementById('eventForm').reset();
     document.getElementById('eventId').value = '';
-    document.getElementById('modalTitle').innerText = 'Add New Event (V2.0)';
+    document.getElementById('modalTitle').innerText = 'Add New Event (V2.2)';
     eventModal.style.display = 'flex';
 }
 
@@ -264,7 +264,6 @@ window.saveEvent = function(e) {
     
     const isOnlineOverride = document.getElementById('isOnlineOverride').checked;
     const isPaid = document.getElementById('isPaid').checked;
-    const isHidden = document.getElementById('isHidden').checked;
 
     const startDate = new Date(startStr);
     const endDate = new Date(endStr);
@@ -289,7 +288,6 @@ window.saveEvent = function(e) {
         // Flags
         isOnlineOverride: isOnlineOverride,
         isPaid: isPaid,
-        isHidden: isHidden,
         
         source: 'manual'
     };
@@ -322,14 +320,13 @@ window.editEvent = function(id) {
         
         document.getElementById('isOnlineOverride').checked = data.isOnlineOverride || false;
         document.getElementById('isPaid').checked = data.isPaid || false;
-        document.getElementById('isHidden').checked = data.isHidden || false;
 
         eventModal.style.display = 'flex';
     });
 }
 
 window.deleteEvent = function(id) {
-    if(confirm('Delete event?')) {
+    if(confirm('Dynamic Delete: This will permanently remove the event from the database and all devices. Confirm?')) {
         db.collection('events').doc(id).delete().then(() => loadEvents());
     }
 }
