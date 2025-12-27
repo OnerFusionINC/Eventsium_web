@@ -39,6 +39,7 @@ function showDashboard() {
     document.getElementById('dashboard').style.display = 'flex';
 }
 
+
 document.getElementById('emailLoginBtn').addEventListener('click', () => {
     const emailRaw = document.getElementById('emailInput').value;
     const email = emailRaw ? emailRaw.trim() : ''; 
@@ -48,11 +49,43 @@ document.getElementById('emailLoginBtn').addEventListener('click', () => {
         alert('Please enter email and password');
         return;
     }
+    
+    const btn = document.getElementById('emailLoginBtn');
+    const originalText = btn.innerText;
+    btn.innerText = "Checking account...";
+    btn.disabled = true;
 
-    auth.signInWithEmailAndPassword(email, password)
+    // Smart Login: Check if this is an Alias
+    const resolveFn = functions.httpsCallable('resolveLoginEmail');
+    
+    resolveFn({ email: email })
+        .then(result => {
+            const realEmail = result.data.email;
+            const isAlias = result.data.isAlias;
+            
+            if (isAlias) {
+                 console.log("Smart Login: Alias detected. Switching " + email + " -> " + realEmail);
+            }
+            
+            // Proceed with Auth using the REAL email
+            return auth.signInWithEmailAndPassword(realEmail, password);
+        })
+        .then(() => {
+             // Success! Listener will handle redirect
+             btn.innerText = "Success!";
+        })
         .catch(error => {
             console.error(error);
-            alert('Login Failed: ' + error.message);
+            btn.innerText = originalText;
+            btn.disabled = false;
+            
+            let msg = error.message;
+            if (error.code === 'auth/wrong-password') {
+                msg = "Incorrect Password.";
+            } else if (error.code === 'auth/user-not-found') {
+                msg = "User not found (check email).";
+            }
+            alert('Login Failed: ' + msg);
         });
 });
 
