@@ -16,7 +16,8 @@ if (!firebase.apps.length) {
 
 const auth = firebase.auth();
 const db = firebase.firestore();
-const functions = firebase.functions(); // Initialize Functions
+const functions = firebase.functions();
+const storage = firebase.storage();
 
 // Auth State Listener
 auth.onAuthStateChanged(user => {
@@ -39,7 +40,7 @@ function showDashboard() {
     document.getElementById('dashboard').style.display = 'flex';
 }
 
-
+// SMART LOGIN LOGIC
 document.getElementById('emailLoginBtn').addEventListener('click', () => {
     const emailRaw = document.getElementById('emailInput').value;
     const email = emailRaw ? emailRaw.trim() : ''; 
@@ -55,23 +56,16 @@ document.getElementById('emailLoginBtn').addEventListener('click', () => {
     btn.innerText = "Checking account...";
     btn.disabled = true;
 
-    // Smart Login: Check if this is an Alias
+    // Call Cloud Function to resolve Alias
     const resolveFn = functions.httpsCallable('resolveLoginEmail');
     
     resolveFn({ email: email })
         .then(result => {
             const realEmail = result.data.email;
-            const isAlias = result.data.isAlias;
-            
-            if (isAlias) {
-                 console.log("Smart Login: Alias detected. Switching " + email + " -> " + realEmail);
-            }
-            
             // Proceed with Auth using the REAL email
             return auth.signInWithEmailAndPassword(realEmail, password);
         })
         .then(() => {
-             // Success! Listener will handle redirect
              btn.innerText = "Success!";
         })
         .catch(error => {
@@ -80,11 +74,8 @@ document.getElementById('emailLoginBtn').addEventListener('click', () => {
             btn.disabled = false;
             
             let msg = error.message;
-            if (error.code === 'auth/wrong-password') {
-                msg = "Incorrect Password.";
-            } else if (error.code === 'auth/user-not-found') {
-                msg = "User not found (check email).";
-            }
+            if (error.code === 'auth/wrong-password') msg = "Incorrect Password.";
+            else if (error.code === 'auth/user-not-found') msg = "User not found.";
             alert('Login Failed: ' + msg);
         });
 });
@@ -93,109 +84,72 @@ window.logout = function() {
     auth.signOut();
 }
 
-// --- OTP PASSWORD RESET LOGIC ---
-
+// OTP RESET LOGIC
 window.showOtpModal = function() {
     document.getElementById('otpModal').style.display = 'flex';
-    // Pre-fill email if they typed it in main login
     const mainEmail = document.getElementById('emailInput').value;
-    if (mainEmail) {
-        document.getElementById('resetEmailInput').value = mainEmail;
-    }
+    if (mainEmail) document.getElementById('resetEmailInput').value = mainEmail;
 }
-
 window.closeOtpModal = function() {
     document.getElementById('otpModal').style.display = 'none';
     document.getElementById('otpStep1').style.display = 'block';
     document.getElementById('otpStep2').style.display = 'none';
-    // Reset inputs
     document.getElementById('otpInput').value = '';
     document.getElementById('newPasswordInput').value = '';
 }
-
 window.sendOtp = function() {
     const email = document.getElementById('resetEmailInput').value;
-    if (!email) {
-        alert("Please enter your email");
-        return;
-    }
-
-    // Call Cloud Function
-    const sendOtpFn = functions.httpsCallable('sendForgotPasswordOtp');
+    if (!email) { alert("Email required"); return; }
     
-    // Show loading state
     const btn = event.target;
-    const originalText = btn.innerText;
     btn.innerText = "Sending...";
     btn.disabled = true;
 
-    console.log("Calling sendForgotPasswordOtp for " + email);
-    
-    sendOtpFn({ email: email })
-        .then(result => {
-             console.log("OTP Sent Result:", result);
-             alert('OTP sent to ' + email + '. Check your inbox (and SPAM folder).');
+    functions.httpsCallable('sendForgotPasswordOtp')({ email: email })
+        .then(() => {
+             alert('OTP sent via Email!');
              document.getElementById('otpStep1').style.display = 'none';
              document.getElementById('otpStep2').style.display = 'block';
-             btn.innerText = originalText;
+             btn.innerText = "Send OTP Code";
              btn.disabled = false;
         })
-        .catch(error => {
-             console.error("OTP Error:", error);
-             alert('Failed to send OTP: ' + error.message);
-             btn.innerText = originalText;
-             btn.disabled = false;
+        .catch(e => {
+            alert(e.message);
+            btn.innerText = "Send OTP Code";
+            btn.disabled = false;
         });
 }
-
 window.submitOtpReset = function() {
     const email = document.getElementById('resetEmailInput').value;
     const otp = document.getElementById('otpInput').value;
-    const newPassword = document.getElementById('newPasswordInput').value;
-
-    if (!otp || !newPassword) {
-        alert("Please enter valid OTP and New Password");
-        return;
-    }
-
-    const resetFn = functions.httpsCallable('resetPasswordWithOtp');
+    const pass = document.getElementById('newPasswordInput').value;
     
+    if(!otp || !pass) { alert("Fill all fields"); return; }
+
     const btn = event.target;
-    const originalText = btn.innerText;
     btn.innerText = "Resetting...";
     btn.disabled = true;
-
-    console.log("Calling resetPasswordWithOtp...");
-
-    // Cloud Function expects: { email, otp, newPassword }
-    resetFn({ email: email, otp: otp, newPassword: newPassword })
-        .then(result => {
-            console.log("Reset Result:", result);
-            alert('Password Reset Successful! You can now login.');
+    
+    functions.httpsCallable('resetPasswordWithOtp')({ email: email, otp: otp, newPassword: pass })
+        .then(() => {
+            alert('Password Reset Success! Login now.');
             closeOtpModal();
-            // Auto fill password field for convenience
-            document.getElementById('emailInput').value = email;
-            document.getElementById('passwordInput').value = newPassword;
-            btn.innerText = originalText;
+            document.getElementById('passwordInput').value = pass;
+            btn.innerText = "Set New Password";
             btn.disabled = false;
-            
-            // Auto login?
-            auth.signInWithEmailAndPassword(email, newPassword);
         })
-        .catch(error => {
-            console.error("Reset Error:", error);
-            alert('Reset Failed: ' + error.message);
-            btn.innerText = originalText;
+        .catch(e => {
+            alert(e.message);
+            btn.innerText = "Set New Password";
             btn.disabled = false;
         });
 }
 
 
-// --- DASHBOARD LOGIC ---
+// --- EVENTS LOGIC V2.0 ---
 
 function loadStats() {
-    document.getElementById('userCount').innerText = '12'; // Mock
-    
+    // Basic stats
     db.collection('events').get().then(snap => {
         document.getElementById('eventCount').innerText = snap.size;
     });
@@ -208,21 +162,28 @@ function loadEvents() {
         
         querySnapshot.forEach(doc => {
             const data = doc.data();
-            const date = data.date ? new Date(data.date.seconds * 1000).toLocaleDateString() : 'TBA';
-            
+            // Fallback for date display
+            let dateStr = 'TBA';
+            if (data.startTime) dateStr = new Date(data.startTime.seconds * 1000).toLocaleDateString();
+            else if (data.date) dateStr = new Date(data.date.seconds * 1000).toLocaleDateString();
+
+            const isHidden = data.isHidden ? '<span style="color:#ef4444; font-size: 0.8em; border:1px solid #ef4444; padding:2px 6px; border-radius:4px; margin-left:8px;">HIDDEN</span>' : '';
+            const isPaid = data.isPaid ? '💰' : '';
+            const isVirtual = data.isOnlineOverride ? '💻' : '';
+
             const item = document.createElement('div');
             item.className = 'event-item';
             item.innerHTML = `
                 <div class="event-info">
-                    <h4>${data.title}</h4>
+                    <h4>${data.title} ${isHidden}</h4>
                     <div class="event-meta">
-                        <span>📅 ${date}</span>
-                        <span>📍 ${data.location || 'Online'}</span>
-                        <span>🏷️ ${data.category || 'General'}</span>
+                        <span>📅 ${dateStr}</span>
+                        <span>📍 ${data.city || 'Unknown City'}, ${data.country || ''} ${isVirtual}</span>
+                        <span>🏷️ ${data.category || 'General'} ${isPaid}</span>
                     </div>
                 </div>
                 <div class="event-actions">
-                    <button class="btn-sm" onclick="editEvent('${doc.id}')">Edit</button>
+                    <button class="btn-sm btn-secondary" onclick="editEvent('${doc.id}')">Edit</button>
                     <button class="btn-sm btn-danger" onclick="deleteEvent('${doc.id}')">Delete</button>
                 </div>
             `;
@@ -231,13 +192,22 @@ function loadEvents() {
     });
 }
 
-// Modal Logic
+// Helper: Convert Date inputs
+function toDateTimeLocal(dateObj) {
+    if (!dateObj) return '';
+    const d = new Date(dateObj.seconds * 1000);
+    // Adjust for local timezone for input[type=datetime-local]
+    const tzOffset = d.getTimezoneOffset() * 60000; 
+    const localISOTime = new Date(d.getTime() - tzOffset).toISOString().slice(0, 16);
+    return localISOTime;
+}
+
 const eventModal = document.getElementById('eventModal');
 
 window.openModal = function() {
     document.getElementById('eventForm').reset();
     document.getElementById('eventId').value = '';
-    document.getElementById('modalTitle').innerText = 'Add Event';
+    document.getElementById('modalTitle').innerText = 'Add New Event (V2.0)';
     eventModal.style.display = 'flex';
 }
 
@@ -245,31 +215,89 @@ window.closeModal = function() {
     eventModal.style.display = 'none';
 }
 
+// UPLOAD IMAGE LOGIC
+window.uploadImage = function(input, targetId) {
+    const file = input.files[0];
+    if (!file) return;
+
+    // Use label as loading indicator
+    const label = input.parentElement;
+    const originalText = label.innerText;
+    label.innerText = "⏳ Uploading...";
+    input.disabled = true;
+
+    // Path: events/banners/{random}_{filename}
+    const path = 'events/' + Date.now() + '_' + file.name;
+    const ref = storage.ref().child(path);
+
+    ref.put(file).then(snapshot => {
+        return snapshot.ref.getDownloadURL();
+    }).then(url => {
+        document.getElementById(targetId).value = url;
+        label.innerText = "✅ Done!";
+        setTimeout(() => { 
+             label.innerHTML = `📁 Upload <input type="file" onchange="uploadImage(this, '${targetId}')">`; 
+        }, 2000);
+    }).catch(error => {
+        console.error(error);
+        alert("Upload Failed: " + error.message);
+        label.innerText = "❌ Error";
+        input.disabled = false;
+    });
+}
+
 window.saveEvent = function(e) {
     e.preventDefault();
     const id = document.getElementById('eventId').value;
-    const title = document.getElementById('title').value;
-    const description = document.getElementById('description').value;
-    const imageUrl = document.getElementById('imageUrl').value;
-    const dateVal = document.getElementById('date').value;
-    const category = document.getElementById('category').value;
     
+    // Collecting Data V2.0
+    const title = document.getElementById('title').value;
+    const startStr = document.getElementById('startTime').value;
+    const endStr = document.getElementById('endTime').value;
+    const category = document.getElementById('category').value;
+    const city = document.getElementById('city').value;
+    const country = document.getElementById('country').value;
+    const imageUrl = document.getElementById('imageUrl').value;
+    const hostLogoUrl = document.getElementById('hostLogoUrl').value;
+    const hostWebsite = document.getElementById('hostWebsite').value;
+    const agenda = document.getElementById('agenda').value;
+    
+    const isOnlineOverride = document.getElementById('isOnlineOverride').checked;
+    const isPaid = document.getElementById('isPaid').checked;
+    const isHidden = document.getElementById('isHidden').checked;
+
+    const startDate = new Date(startStr);
+    const endDate = new Date(endStr);
+
     const data = {
-        title, description, imageUrl, category,
-        date: firebase.firestore.Timestamp.fromDate(new Date(dateVal)),
-        location: 'TBD' // Default
+        title: title,
+        date: firebase.firestore.Timestamp.fromDate(startDate), // App uses 'date' for sorting
+        startTime: firebase.firestore.Timestamp.fromDate(startDate),
+        endTime: firebase.firestore.Timestamp.fromDate(endDate),
+        city: city, 
+        country: country,
+        category: category,
+        
+        // URLs
+        imageUrl: imageUrl, // Banner
+        hostLogoUrl: hostLogoUrl, 
+        hostWebsite: hostWebsite, // Ticket Link
+        
+        // Details
+        agenda: agenda,
+        
+        // Flags
+        isOnlineOverride: isOnlineOverride,
+        isPaid: isPaid,
+        isHidden: isHidden,
+        
+        source: 'manual'
     };
     
     if (id) {
-        db.collection('events').doc(id).update(data).then(() => {
-            closeModal();
-            loadEvents();
-        });
+        db.collection('events').doc(id).update(data).then(() => { closeModal(); loadEvents(); });
     } else {
-        db.collection('events').add(data).then(() => {
-            closeModal();
-            loadEvents();
-        });
+        db.collection('events').add(data).then(() => { closeModal(); loadEvents(); });
     }
 }
 
@@ -277,22 +305,31 @@ window.editEvent = function(id) {
     db.collection('events').doc(id).get().then(doc => {
         const data = doc.data();
         document.getElementById('eventId').value = id;
-        document.getElementById('title').value = data.title;
-        document.getElementById('imageUrl').value = data.imageUrl || '';
-        document.getElementById('description').value = data.description || '';
-        document.getElementById('category').value = data.category || 'Tech';
-        if (data.date) {
-             const d = new Date(data.date.seconds * 1000);
-             const iso = new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().slice(0, 16);
-             document.getElementById('date').value = iso; 
-        }
         document.getElementById('modalTitle').innerText = 'Edit Event';
+        
+        // Fill Fields
+        document.getElementById('title').value = data.title || '';
+        document.getElementById('startTime').value = toDateTimeLocal(data.startTime || data.date);
+        document.getElementById('endTime').value = toDateTimeLocal(data.endTime);
+        document.getElementById('category').value = data.category || 'Tech';
+        
+        document.getElementById('city').value = data.city || '';
+        document.getElementById('country').value = data.country || '';
+        document.getElementById('imageUrl').value = data.imageUrl || '';
+        document.getElementById('hostLogoUrl').value = data.hostLogoUrl || '';
+        document.getElementById('hostWebsite').value = data.hostWebsite || '';
+        document.getElementById('agenda').value = data.agenda || '';
+        
+        document.getElementById('isOnlineOverride').checked = data.isOnlineOverride || false;
+        document.getElementById('isPaid').checked = data.isPaid || false;
+        document.getElementById('isHidden').checked = data.isHidden || false;
+
         eventModal.style.display = 'flex';
     });
 }
 
 window.deleteEvent = function(id) {
-    if(confirm('Are you sure you want to delete this event?')) {
-        db.collection('events').doc(id).delete();
+    if(confirm('Delete event?')) {
+        db.collection('events').doc(id).delete().then(() => loadEvents());
     }
 }
