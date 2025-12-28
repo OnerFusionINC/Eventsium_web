@@ -1,0 +1,15 @@
+[
+    {
+        "relation": [
+            "delegate_permission/common.handle_all_urls"
+        ],
+        "target": {
+            "namespace": "android_app",
+            "package_name": "com.onerfusion.eventsium",
+            "sha256_cert_fingerprints": [
+                "87:EB:2F:05:A0:1C:A4:75:4F:65:EE:85:35:8A:A3:82:6B:9C:01:D5:A2:99:48:97:4C:A3:94:95:BC:8C:F5:8C",
+                "99:A2:60:13:0A:03:D0:AC:72:31:71:C6:63:9E:0C:8B:C1:52:0C:02:76:98:7C:F8:88:F4:46:68:08:E3:0A:5F"
+            ]
+        }
+    }
+]
