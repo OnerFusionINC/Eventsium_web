@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Redirecting...</title>
+    <script>
+        (function() {
+            var path = window.location.pathname;
+            
+            // Check if this is an Event Deep Link
+            if (path.indexOf('/event/') !== -1) {
+                var userAgent = navigator.userAgent || navigator.vendor || window.opera;
+                
+                // 1. Android -> Play Store
+                if (/android/i.test(userAgent)) {
+                    window.location.href = "https://play.google.com/store/apps/details?id=com.onerfusion.eventsium";
+                    return;
+                }
+                
+                // 2. iOS -> App Store (Placeholder until live)
+                if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
+                    // For now, redirect to Landing Page
+                    window.location.href = "/"; 
+                    return;
+                }
+            }
+            
+            // Default: Redirect to Home Page
+            window.location.replace("/");
+        })();
+    </script>
+</head>
+<body>
+    <p>Redirecting to Eventsium...</p>
+</body>
+</html>
