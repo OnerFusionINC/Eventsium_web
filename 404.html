@@ -11,15 +11,27 @@
             if (path.indexOf('/event/') !== -1) {
                 var userAgent = navigator.userAgent || navigator.vendor || window.opera;
                 
-                // 1. Android -> Play Store
+                // 1. Android -> Intent with Fallback to Homepage
                 if (/android/i.test(userAgent)) {
-                    window.location.href = "https://play.google.com/store/apps/details?id=com.onerfusion.eventsium";
+                    // This mechanism asks Chrome to:
+                    // 1. Open the App if installed.
+                    // 2. If NOT installed, go to 'S.browser_fallback_url' (The Homepage).
+                    // This prevents forcing Huawei users to the Play Store.
+                    
+                    var host = window.location.host; // e.g. eventsium.com
+                    var scheme = "https";
+                    var package = "com.onerfusion.eventsium";
+                    var fallback = window.location.origin; // https://eventsium.com
+                    
+                    // Construct Intent URI
+                    var intent = "intent://" + host + path + "#Intent;scheme=" + scheme + ";package=" + package + ";S.browser_fallback_url=" + fallback + ";end";
+                    
+                    window.location.href = intent;
                     return;
                 }
                 
-                // 2. iOS -> App Store (Placeholder until live)
+                // 2. iOS -> App Store (Placeholder) or Homepage
                 if (/iPad|iPhone|iPod/.test(userAgent) && !window.MSStream) {
-                    // For now, redirect to Landing Page
                     window.location.href = "/"; 
                     return;
                 }
@@ -31,6 +43,6 @@
     </script>
 </head>
 <body>
-    <p>Redirecting to Eventsium...</p>
+    <p>Redirecting into the matrix...</p>
 </body>
 </html>
